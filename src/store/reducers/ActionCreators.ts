@@ -2,14 +2,18 @@ import { userSlice } from './UserSlice'
 import { IUser } from './../../models/IUser'
 import axios from 'axios'
 import { AppDispatch } from './../store'
-export const fetchUsers = () => async (dispatch: AppDispatch) => {
-    try {
-        dispatch(userSlice.actions.usersFetching())
-        const res = await axios.get<IUser[]>(
-            'https://jsonplaceholder.typicode.com/users'
-        )
-        dispatch(userSlice.actions.usersFetchingSuccess(res.data))
-    } catch (e) {
-        dispatch(userSlice.actions.usersFetchingError(e.message))
+import { createAsyncThunk } from '@reduxjs/toolkit'
+
+export const fetchUsers = createAsyncThunk(
+    'user/fetchAll',
+    async (_, thunkApi) => {
+        try {
+            const res = await axios.get<IUser[]>(
+                'https://jsonplaceholder.typicode.com/users'
+            )
+            return res.data
+        } catch (error) {
+            return thunkApi.rejectWithValue('Error loading data')
+        }
     }
-}
+)
